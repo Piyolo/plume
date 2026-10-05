@@ -28,7 +28,8 @@ Every task's requirements implicitly include this section; values are copied ver
 - **Chapter markers:** `00` on Hero, `01`–`07` across Manifesto → Order CTA, rendered `NN / 07`. No marker on age gate, footer, drawer, or checkout overlay.
 - **Products (exact):** PLUME ONE `$64` · PLUME ARC `$22` · PLUME RESERVE `$18` each.
 - **Assets:** images self-hosted in `assets/img/` from free-licence sources (Unsplash/Pexels) only. No grey-box placeholders — if a product shot cannot be sourced, that slot uses the texture plate with typographic treatment.
-- **Verification viewports:** 1440×900 (desktop) and 390×844 (mobile).
+- **Verification viewports:** 1440×900 (desktop), 834×1112 (tablet), 390×844 (mobile) — all three are required; tablet is its own breakpoint, not a scaled desktop.
+- **Responsive grid:** range cards go 3 columns ≥1024px, 2 columns 640–1023px, 1 column <640px.
 - **Static server:** `python -m http.server 8080 --directory "C:\Users\Piolo Mangilog\OneDrive\Documents\Work\vape-showcase"` (background), site at `http://localhost:8080/`.
 
 ## Review Focus
@@ -372,7 +373,7 @@ A `position:fixed; inset:0; pointer-events:none` grain layer at low opacity (SVG
 
 - [ ] **Step 3: Section styling**
 
-Hero full-viewport with the device image bleeding off the right edge. Chapters laid out as two columns (sticky media / scrolling copy) with spec rows as hairline-divided definition lists. Range as a 3-column grid collapsing to 1 on mobile. Craft with stacked full-bleed images. Order CTA centred with oversized type. Cards: `--surface` background, 1px `--line` border, no shadows, price in `--accent`.
+Hero full-viewport with the device image bleeding off the right edge. Chapters laid out as two columns (sticky media / scrolling copy) with spec rows as hairline-divided definition lists. Range as a 3-column grid at ≥1024px, 2 columns at 640–1023px (the tablet case), 1 column below 640px. Craft with stacked full-bleed images. Order CTA centred with oversized type. Cards: `--surface` background, 1px `--line` border, no shadows, price in `--accent`.
 
 - [ ] **Step 4: Image failure fallback — Review Focus #4**
 
@@ -474,9 +475,12 @@ Pin `#chapter-arc` for `+=1400`; translate an inner track `xPercent: -66` (3 col
 
 Pin `#chapter-reserve` for `+=1400`; the three flavour cards rise and stack (`y` from `80` to `-40 * index`, opacity to 1) as scrub progresses, with the tasting-note text cross-fading between flavours.
 
-- [ ] **Step 4: Mobile pin fallback**
+- [ ] **Step 4: Pin fallback across breakpoints**
 
-Below 768px, shorten every pin to `+=900`, and below 480px release `#chapter-arc`'s horizontal track entirely (it renders as a vertical stack with no `ScrollTrigger`). Re-run `ScrollTrigger.refresh()` after each `matchMedia` change.
+Tablet (768–1023px, e.g. 834×1112) keeps the full pin choreography — it is a first-class
+viewport, not a squeezed desktop. Below 768px, shorten every pin to `+=900`, and below
+480px release `#chapter-arc`'s horizontal track entirely (it renders as a vertical stack with
+no `ScrollTrigger`). Re-run `ScrollTrigger.refresh()` after each `matchMedia` change.
 
 - [ ] **Step 5: Verify — pin lifecycle and resize**
 
@@ -588,9 +592,9 @@ In the browser:
 ```
 Expected: `canvases: 0`, `network: []`, `cdnTags: []`, `thirdPartyFetch: 0`, `deadAnchors: []`. This proves the "no 3D", "no backend / no third-party requests", and "nav links never dead-end" constraints from spec §7.
 
-- [ ] **Step 3: Screenshot sweep at both viewports**
+- [ ] **Step 3: Screenshot sweep at all three viewports**
 
-At 1440×900 and 390×844, capture: hero, each of the three chapters mid-pin, range, craft, order CTA, footer, open drawer, checkout form, confirmation. Inspect each for clipped display type, overlapping text, illegible contrast, broken pinning, or horizontal overflow (`document.documentElement.scrollWidth <= innerWidth` must hold at both widths).
+At 1440×900 (desktop), 834×1112 (tablet) and 390×844 (mobile), capture: hero, each of the three chapters mid-pin, range, craft, order CTA, footer, open drawer, checkout form, confirmation. Inspect each for clipped display type, overlapping text, illegible contrast, broken pinning, or horizontal overflow (`document.documentElement.scrollWidth <= innerWidth` must hold at **all three** widths). Check the tablet range grid is at 2 columns, not 1 and not 3.
 
 - [ ] **Step 4: Fix any defects found**
 

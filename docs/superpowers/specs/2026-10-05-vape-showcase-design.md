@@ -194,9 +194,13 @@ chapters render from it, so prices and names can never drift between the page an
 
 **Testing / verification**
 
-- Screenshot verification at 1440×900 and 390×844 using the browser tool at several scroll
-  positions, checking: pinning engages and releases cleanly, reveals fire, no overlapping
-  or clipped text, grain and HUD sit above content.
+- Three viewports, all equally load-bearing: **1440×900 desktop**, **834×1112 tablet**,
+  **390×844 mobile**. Tablet is a real breakpoint, not a squeezed desktop — the range grid
+  collapses 3 → 2 → 1 columns, chapters keep two columns until 768px, and the HUD sheds its
+  centre label before it sheds the cart button.
+- Screenshot verification at each of the three widths at several scroll positions, checking:
+  pinning engages and releases cleanly, reveals fire, no overlapping or clipped text, no
+  horizontal overflow, grain and HUD sit above content.
 - Functional pass: age gate → browse → add to cart → change qty → checkout → confirmation
   number → cart empty after reload.
 - Confirmed by evidence (screenshots and command output) before completion is claimed.
