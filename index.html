@@ -11,6 +11,30 @@
 </head>
 <body>
 
+<!-- ================================================== AGE GATE ==== -->
+<div class="gate" id="ageGate" role="dialog" aria-modal="true" aria-labelledby="gateTitle">
+  <div class="gate__panel">
+    <p class="gate__brand mono">PLUME</p>
+
+    <div class="gate__ask" id="gateAsk">
+      <h1 class="gate__q" id="gateTitle">Are you 21 or older?</h1>
+      <p class="gate__sub">This site contains content about nicotine products.</p>
+      <div class="gate__actions">
+        <button type="button" class="btn btn--solid" id="gateYes">Yes, I&#39;m 21</button>
+        <button type="button" class="btn btn--ghost" id="gateNo">No, take me back</button>
+      </div>
+    </div>
+
+    <div class="gate__ask" id="gateRefuse" hidden>
+      <h1 class="gate__q">Come back when you&#39;re 21.</h1>
+      <p class="gate__sub">Nothing to see here yet — not for you, not today.</p>
+      <div class="gate__actions">
+        <button type="button" class="btn btn--ghost" id="gateBack">Take me back</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="assets/vendor/gsap.min.js"></script>
 <script src="assets/vendor/ScrollTrigger.min.js"></script>
 <script src="assets/vendor/lenis.min.js"></script>

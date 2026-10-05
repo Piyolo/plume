@@ -25,3 +25,99 @@
   --z-checkout: 70;
   --z-gate: 90;
 }
+
+/* ==========================================================================
+   Base
+   ========================================================================== */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+body.is-gated { overflow: hidden; height: 100vh; }
+
+.mono {
+  font-family: var(--font-mono);
+  font-size: .72rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+/* ==========================================================================
+   Buttons
+   ========================================================================== */
+
+.btn {
+  font-family: var(--font-mono);
+  font-size: .72rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  padding: .95rem 1.7rem;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  transition: border-color .3s ease, background-color .3s ease, color .3s ease;
+}
+
+.btn--solid {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--bg);
+}
+
+.btn--solid:hover { background: transparent; color: var(--accent); }
+.btn--ghost:hover { border-color: var(--text); }
+.btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+/* ==========================================================================
+   Age gate  (spec §6)
+   ========================================================================== */
+
+.gate {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-gate);
+  background: var(--bg);
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+  text-align: center;
+}
+
+.gate.is-leaving {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .6s ease;
+}
+
+.gate__panel { max-width: 40rem; }
+
+.gate__brand {
+  color: var(--muted);
+  letter-spacing: .42em;
+  margin: 0 0 3rem;
+}
+
+.gate__q {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(2.4rem, 7vw, 5rem);
+  line-height: .92;
+  letter-spacing: -.02em;
+  margin: 0 0 1.25rem;
+}
+
+.gate__sub { color: var(--muted); margin: 0 0 2.5rem; }
+
+.gate__actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
