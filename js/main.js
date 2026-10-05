@@ -63,8 +63,39 @@ function initAgeGate() {
   back.addEventListener('click', function () { show(ask); });
 }
 
+/* ------------------------------------------------- image fallback --- */
+/* Spec §5: a failed image becomes a texture plate with typographic
+   treatment — never a broken-image icon. The `error` event does not bubble,
+   so it is caught in the capture phase to also cover images added later. */
+
+function markPlate(img) {
+  var host = img.parentNode;
+  if (!host || host.nodeType !== 1) return;
+  host.classList.add('is-plate');
+  if (!host.getAttribute('data-plate-label')) {
+    var alt = img.getAttribute('alt');
+    if (alt) host.setAttribute('data-plate-label', alt);
+  }
+}
+
+function initImageFallback() {
+  function onError(event) {
+    var target = event.target;
+    if (!target || target.tagName !== 'IMG') return;
+    if (String(target.getAttribute('src') || '').indexOf('assets/img/') !== 0) return;
+    markPlate(target);
+  }
+  document.addEventListener('error', onError, true);
+
+  var existing = document.querySelectorAll('img[src^="assets/img/"]');
+  for (var i = 0; i < existing.length; i++) {
+    if (existing[i].complete && existing[i].naturalWidth === 0) markPlate(existing[i]);
+  }
+}
+
 /* ---------------------------------------------------------------- boot --- */
 
 document.addEventListener('DOMContentLoaded', function () {
   initAgeGate();
+  initImageFallback();
 });
