@@ -39,7 +39,7 @@ var PLUME_PRODUCTS = [
     chapter: '02',
     specs: [
       { k: 'E-LIQUID', v: '10 ml' },
-      { k: 'PUFFS', v: '≈ 600' },
+      { k: 'PUFFS', v: '~ 600' },
       { k: 'NICOTINE', v: '20 mg/ml' },
       { k: 'WEIGHT', v: '32 g' },
     ],

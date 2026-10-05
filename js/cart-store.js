@@ -9,14 +9,22 @@
    ========================================================================== */
 
 var PLUME_CART_KEY = 'plume.cart';
+/* Nobody orders 4,000 of one device; this only exists so a merged or corrupt
+   qty cannot produce an absurd badge or an overflowing subtotal. */
+var MAX_LINE_QTY = 99;
 
+/* A cart line must be internally sane, not merely well-typed. Stored data is
+   untrusted: anything that reached localStorage could be hand-edited or left
+   behind by an older build. Rejecting negative/fractional quantities and
+   non-integer prices here is what stops a corrupt store producing a negative
+   badge or fractional cents. */
 function isUsableLine(line) {
   return !!line &&
     typeof line.id === 'string' &&
     typeof line.name === 'string' &&
     typeof line.variant === 'string' &&
-    Number.isFinite(line.unitPrice) &&
-    Number.isFinite(line.qty);
+    Number.isInteger(line.unitPrice) && line.unitPrice >= 0 &&
+    Number.isInteger(line.qty) && line.qty > 0;
 }
 
 function cloneLine(line) {
@@ -43,11 +51,31 @@ function createCartStore(storage) {
       var raw = storage.getItem(PLUME_CART_KEY);
       if (raw === null || raw === undefined || raw === '') return;
       var parsed = JSON.parse(raw);
-      lines = Array.isArray(parsed) ? parsed.filter(isUsableLine).map(cloneLine) : [];
+      if (!Array.isArray(parsed)) throw new Error('cart is not an array');
+      var seen = {};
+      var kept = [];
+      for (var i = 0; i < parsed.length; i++) {
+        var line = parsed[i];
+        if (!isUsableLine(line)) continue;
+        /* Duplicate ids would render as duplicate rows, and find() only ever
+           returns the first — leaving the rest permanently unremovable.
+           Merge them into one line instead. */
+        if (seen[line.id]) {
+          seen[line.id].qty = Math.min(MAX_LINE_QTY, seen[line.id].qty + line.qty);
+          continue;
+        }
+        var copy = cloneLine(line);
+        copy.qty = Math.min(MAX_LINE_QTY, copy.qty);
+        seen[line.id] = copy;
+        kept.push(copy);
+      }
+      lines = kept;
     } catch (err) {
-      // Malformed or unreadable storage: fall back to memory for this session.
+      /* Malformed storage: start empty but KEEP persistence enabled, so the
+         next mutation overwrites the bad value with good JSON. Disabling it
+         here would leave the corrupt string in place and the cart would never
+         persist again for the rest of the session. */
       lines = [];
-      persistable = false;
     }
   }
 
@@ -102,7 +130,7 @@ function createCartStore(storage) {
     if (qty <= 0) {
       lines = lines.filter(function (l) { return l.id !== id; });
     } else {
-      line.qty = qty;
+      line.qty = Math.min(MAX_LINE_QTY, Math.max(1, Math.round(qty)));
     }
     persist();
     emit();

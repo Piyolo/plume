@@ -6,6 +6,8 @@
 <title>PLUME — Vapour, refined.</title>
 <meta name="description" content="PLUME. A design demo: a scroll-driven showcase for a fictional premium vape brand. No products are sold and no order is placed.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%97%88%3C/text%3E%3C/svg%3E">
+<link rel="preload" href="assets/fonts/instrument-serif-normal-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/space-grotesk-normal-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="assets/fonts/fonts.css">
 <link rel="stylesheet" href="css/style.css">
 </head>
@@ -43,8 +45,11 @@
   <p class="hud__section" id="sectionName">INTRODUCTION</p>
   <div class="hud__right">
     <span class="hud__marker mono" id="chapterMarker" aria-hidden="true">00 / 07</span>
-    <button type="button" class="hud__cart" id="cartBtn" aria-label="Open cart">
-      Cart<span class="hud__count mono" id="cartCount" hidden>0</span>
+    <!-- No aria-label here: it would override the subtree and hide the count
+         from screen readers. The visible "Cart" is the accessible name and the
+         badge is a polite live region so add/remove is announced. -->
+    <button type="button" class="hud__cart" id="cartBtn">
+      Cart<span class="hud__count mono" id="cartCount" aria-live="polite" hidden>0</span>
     </button>
   </div>
 </header>
@@ -91,7 +96,7 @@
 
   <div class="chapter__media">
     <img class="chapter__hero" src="assets/img/one-hero.jpg" alt="PLUME ONE pod device on black">
-    <img class="chapter__detail" src="assets/img/one-detail.jpg" alt="PLUME ONE detail, dark finish">
+    <img class="chapter__detail" loading="lazy" decoding="async" src="assets/img/one-detail.jpg" alt="PLUME ONE detail, dark finish">
   </div>
 
   <div class="chapter__copy">
@@ -127,7 +132,7 @@
 
   <div class="chapter__media">
     <img class="chapter__hero" src="assets/img/arc-hero.jpg" alt="PLUME ARC slim device in a shaft of light">
-    <img class="chapter__detail" src="assets/img/arc-detail.jpg" alt="PLUME ARC in vapour">
+    <img class="chapter__detail" loading="lazy" decoding="async" src="assets/img/arc-detail.jpg" alt="PLUME ARC in vapour">
   </div>
 
   <div class="chapter__copy">
@@ -140,7 +145,7 @@
 
     <dl class="specs">
       <div class="specs__row"><dt class="mono">E-LIQUID</dt><dd>10 ml</dd></div>
-      <div class="specs__row"><dt class="mono">PUFFS</dt><dd>≈ 600</dd></div>
+      <div class="specs__row"><dt class="mono">PUFFS</dt><dd>~ 600</dd></div>
       <div class="specs__row"><dt class="mono">NICOTINE</dt><dd>20 mg/ml</dd></div>
       <div class="specs__row"><dt class="mono">WEIGHT</dt><dd>32 g</dd></div>
     </dl>
@@ -171,7 +176,7 @@
 
   <div class="chapter__media">
     <img class="chapter__hero" src="assets/img/reserve-hero.jpg" alt="PLUME RESERVE bottle on dark wood">
-    <img class="chapter__detail" src="assets/img/reserve-detail.jpg" alt="PLUME RESERVE bottles in warm light">
+    <img class="chapter__detail" loading="lazy" decoding="async" src="assets/img/reserve-detail.jpg" alt="PLUME RESERVE bottles in warm light">
   </div>
 
   <div class="chapter__copy">
@@ -233,7 +238,7 @@
 
   <div class="range__grid">
     <article class="card reveal" data-card="plume-one">
-      <img src="assets/img/one-hero.jpg" alt="PLUME ONE">
+      <img src="assets/img/one-hero.jpg" alt="PLUME ONE" loading="lazy" decoding="async">
       <div class="card__body">
         <p class="card__index mono">01</p>
         <h3 class="card__name">PLUME ONE</h3>
@@ -249,7 +254,7 @@
     </article>
 
     <article class="card reveal" data-card="plume-arc">
-      <img src="assets/img/arc-hero.jpg" alt="PLUME ARC">
+      <img src="assets/img/arc-hero.jpg" alt="PLUME ARC" loading="lazy" decoding="async">
       <div class="card__body">
         <p class="card__index mono">02</p>
         <h3 class="card__name">PLUME ARC</h3>
@@ -265,7 +270,7 @@
     </article>
 
     <article class="card reveal" data-card="plume-reserve">
-      <img src="assets/img/reserve-hero.jpg" alt="PLUME RESERVE">
+      <img src="assets/img/reserve-hero.jpg" alt="PLUME RESERVE" loading="lazy" decoding="async">
       <div class="card__body">
         <p class="card__index mono">03</p>
         <h3 class="card__name">PLUME RESERVE</h3>
@@ -330,13 +335,13 @@
   <p class="footer__note mono" id="disclaimer">This is a design demo. No products are sold and no order is placed.</p>
   <p class="footer__note mono">21+ only. Nicotine is an addictive substance.</p>
   <p class="footer__note mono">Not affiliated with any real brand.</p>
-  <p class="footer__brand">PLUME</p>
+  <p class="footer__brand" aria-hidden="true">PLUME</p>
 </footer>
 
 <!-- ================================================ CART DRAWER === -->
 <div class="scrim" id="cartScrim" hidden></div>
 
-<aside class="drawer" id="cartDrawer" aria-label="Cart" hidden>
+<aside class="drawer" id="cartDrawer" role="dialog" aria-modal="true" aria-label="Cart" hidden>
   <header class="drawer__head">
     <p class="mono">YOUR CART</p>
     <button type="button" class="drawer__close" id="cartClose" aria-label="Close cart">×</button>
@@ -358,7 +363,7 @@
 </aside>
 
 <!-- ================================================= CHECKOUT ===== -->
-<section class="checkout" id="checkout" aria-label="Checkout" hidden>
+<section class="checkout" id="checkout" role="dialog" aria-modal="true" aria-label="Checkout" hidden>
   <div class="checkout__panel">
     <header class="checkout__head">
       <p class="mono">CHECKOUT</p>

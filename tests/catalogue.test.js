@@ -33,9 +33,14 @@ test('every add-to-cart button matches its product price and offers a real varia
   }
 });
 
-test('the only prices in the document are the three catalogue prices', () => {
-  const found = [...new Set([...html.matchAll(/data-price="(\d+)"/g)].map((m) => Number(m[1])))];
-  assert.deepEqual(found.sort((a, b) => a - b), [1800, 2200, 6400]);
+test('the only prices in the document are catalogue prices', () => {
+  const prices = [...new Set([...html.matchAll(/data-price="(\d+)"/g)].map((m) => Number(m[1])))];
+  const valid = new Set(products.map((p) => p.priceCents));
+  for (const price of prices) {
+    assert.ok(valid.has(price),
+      `${price} appears in the document but is not a catalogue price`);
+  }
+  assert.ok(prices.length > 0);
 });
 
 test('every range card shows its product image and name', () => {

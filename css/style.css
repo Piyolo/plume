@@ -39,7 +39,12 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 
-html { -webkit-text-size-adjust: 100%; scroll-behavior: auto; }
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: auto;
+  /* keeps the layout still when body.is-locked removes the scrollbar */
+  scrollbar-gutter: stable;
+}
 
 body {
   margin: 0;
@@ -350,6 +355,11 @@ section { position: relative; }
   height: 124%;
   object-fit: cover;
   opacity: .32;
+  /* Body copy sits directly on this photograph, so the plate must be dark
+     enough that `--muted` clears 4.5:1 against its brightest plume: measured
+     worst case without this filter is 1.60:1, with it 5.08:1. A computed-style
+     contrast sweep cannot catch this class of bug — it has no backdrop. */
+  filter: brightness(.35);
   z-index: -1;
 }
 
@@ -387,8 +397,6 @@ section { position: relative; }
   overflow: hidden;
 }
 
-.chapter__copy { will-change: transform; }
-
 .chapter__media {
   display: grid;
   gap: 1rem;
@@ -401,14 +409,27 @@ section { position: relative; }
   object-fit: cover;
 }
 
+/* Inside a pin frame the whole media column must fit 100vh, or the tail is
+   clipped. Section padding (2 x 12vh) + hero (52vh) + detail (24vh) + a 16px
+   gap came to h + 16px — always 16px too tall. The detail therefore takes only
+   what is left in the frame budget, which is self-correcting if the other
+   clamps ever change. If the budget went negative this resolves to an invalid
+   height and falls back to auto rather than clipping. */
 .chapter__detail {
   width: 68%;
-  height: clamp(9rem, 24vh, 16rem);
+  height: min(
+    clamp(9rem, 20vh, 16rem),
+    calc(100vh - 2 * var(--section-pad) - clamp(18rem, 52vh, 34rem) - 1rem)
+  );
   object-fit: cover;
   justify-self: end;
 }
 
-.chapter__copy { padding-top: clamp(1rem, 4vh, 3rem); }
+/* merged: `will-change` and the frame's top offset were two separate rules */
+.chapter__copy {
+  padding-top: clamp(1rem, 4vh, 3rem);
+  will-change: transform;
+}
 
 .chapter__index { color: var(--accent); }
 
@@ -659,7 +680,12 @@ section { position: relative; }
    Craft
    ========================================================================== */
 
-.craft__copy { max-width: 40rem; }
+/* 46rem, not 40rem: "Machined, not moulded" measures 701px at --display-sm
+   and was overflowing this box by 61px. The display scale itself
+   (clamp(3rem,11vw,11rem)) cannot be used for a 19-character heading — at
+   1440px it needs 1509px of a 640px column — so --display is reserved for the
+   full-bleed hero wordmark and order title. */
+.craft__copy { max-width: 46rem; }
 .craft__body { margin-top: 1.25rem; }
 .craft__copy .specs { max-width: 30rem; }
 
@@ -759,8 +785,8 @@ body.is-locked { overflow: hidden; }
 
 .hud__count.is-bump { animation: badge-bump .45s ease; }
 
-.btn:disabled,
-.checkoutBtn:disabled {
+/* `#checkoutBtn` carries `.btn--solid`, so `.btn:disabled` already covers it */
+.btn:disabled {
   opacity: .4;
   cursor: not-allowed;
 }

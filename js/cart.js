@@ -61,6 +61,35 @@ function generateOrderNumber(now) {
 var REQUIRED_FIELDS = ['name', 'email', 'address', 'city', 'postcode'];
 var EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+/**
+ * Pure checkout validation, DOM-free so it can be tested directly.
+ * Returns every problem plus which field to focus first.
+ * @param {Object<string,string>} values keyed by field name
+ * @returns {{ok: boolean, errors: Array<{name: string, message: string}>, firstInvalid: string|null}}
+ */
+function validateCheckout(values) {
+  var errors = [];
+  var firstInvalid = null;
+
+  for (var i = 0; i < REQUIRED_FIELDS.length; i++) {
+    var name = REQUIRED_FIELDS[i];
+    var raw = values[name];
+    var value = String(raw === undefined || raw === null ? '' : raw).trim();
+
+    if (!value) {
+      errors.push({ name: name, message: 'This field is required.' });
+      if (!firstInvalid) firstInvalid = name;
+      continue;
+    }
+    if (name === 'email' && !EMAIL_PATTERN.test(value)) {
+      errors.push({ name: name, message: 'Enter a valid email address.' });
+      if (!firstInvalid) firstInvalid = name;
+    }
+  }
+
+  return { ok: errors.length === 0, errors: errors, firstInvalid: firstInvalid };
+}
+
 /* Validation failures must never throw at the visitor — private mode and
    blocked storage are normal, not exceptional. */
 function safeStorage() {
@@ -182,8 +211,29 @@ function initCart() {
   function render() {
     var lines = store.items();
 
+    /* Rebuilding the list destroys whatever the visitor had focused. Capture
+       the row and action first so keyboard users keep their place after every
+       +/- or Remove, instead of being dropped to <body>. */
+    var active = document.activeElement;
+    var activeRow = active && active.closest ? active.closest('.line') : null;
+    var returnTo = null;
+    if (activeRow && active.getAttribute) {
+      var act = active.getAttribute('data-act');
+      if (act) returnTo = { lineId: activeRow.getAttribute('data-line'), act: act };
+    }
+
     linesHost.textContent = '';
     for (var i = 0; i < lines.length; i++) linesHost.appendChild(renderLine(lines[i]));
+
+    if (returnTo) {
+      var rows = linesHost.querySelectorAll('.line');
+      for (var r = 0; r < rows.length; r++) {
+        if (rows[r].getAttribute('data-line') !== returnTo.lineId) continue;
+        var btn = rows[r].querySelector('[data-act="' + returnTo.act + '"]');
+        if (btn) btn.focus();
+        break;
+      }
+    }
 
     var empty = lines.length === 0;
     emptyState.hidden = !empty;
@@ -226,6 +276,9 @@ function initCart() {
     if (scrim) scrim.hidden = true;
     if (overlay && !overlay.hidden) return;
     setLock(false);
+    /* Escape and the ✕ both land here; without this, focus stays on a button
+       that is now display:none and drops to <body>. */
+    if (cartBtn) cartBtn.focus();
   }
 
   function closeCheckout() {
@@ -233,6 +286,9 @@ function initCart() {
     overlay.hidden = true;
     if (confirmPanel) confirmPanel.hidden = true;
     if (checkoutGrid) checkoutGrid.hidden = false;
+    /* Errors belong to the submission that caused them — they must not greet
+       the visitor again the next time they open the checkout. */
+    clearErrors();
     setLock(false);
     if (cartBtn) cartBtn.focus();
   }
@@ -244,16 +300,56 @@ function initCart() {
     continueShopping.addEventListener('click', function () {
       closeDrawer();
       var range = document.getElementById('range');
-      if (range && window.__lenis) window.__lenis.scrollTo(range, { offset: -64 });
+      if (!range) return;
+      /* Reduced motion never constructs Lenis, so __lenis is absent and this
+         button would otherwise be a visible no-op. */
+      if (window.__lenis) window.__lenis.scrollTo(range, { offset: -64 });
+      else range.scrollIntoView({ behavior: 'auto', block: 'start' });
     });
   }
   if (scrim) scrim.addEventListener('click', closeDrawer);
   if (checkoutClose) checkoutClose.addEventListener('click', closeCheckout);
 
+  /* aria-modal tells assistive tech the page behind is inert, but only a real
+     focus trap makes that true for keyboard users: without it Tab walks out of
+     the open dialog into content that is scrolled away and dimmed. */
+  function trapTab(container, event) {
+    var candidates = container.querySelectorAll(
+      'a[href], button:not([disabled]), input:not([disabled]), ' +
+      'textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    );
+    var focusable = [];
+    for (var i = 0; i < candidates.length; i++) {
+      if (candidates[i].getClientRects().length > 0) focusable.push(candidates[i]);
+    }
+    if (!focusable.length) return;
+
+    var first = focusable[0];
+    var last = focusable[focusable.length - 1];
+    if (!container.contains(document.activeElement)) {
+      event.preventDefault();
+      first.focus();
+    } else if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+
   document.addEventListener('keydown', function (event) {
-    if (event.key !== 'Escape') return;
-    if (overlay && !overlay.hidden) closeCheckout();
-    else if (!drawer.hidden) closeDrawer();
+    if (event.key === 'Escape') {
+      if (overlay && !overlay.hidden) closeCheckout();
+      else if (!drawer.hidden) closeDrawer();
+      return;
+    }
+    if (event.key !== 'Tab') return;
+    if (overlay && !overlay.hidden) {
+      trapTab(overlay, event);
+      return;
+    }
+    if (!drawer.hidden) trapTab(drawer, event);
   });
 
   /* ------------------------------------------------------- add / qty --- */
@@ -292,18 +388,33 @@ function initCart() {
 
   /* ---------------------------------------------------- variant chips --- */
 
-  document.addEventListener('click', function (event) {
-    var chip = event.target && event.target.closest ? event.target.closest('.swatch') : null;
-    if (!chip) return;
+  /* Selection is not only a colour: without aria-pressed the state is invisible
+     to assistive tech. `is-active` stays the single source of truth for looks
+     and the pressed state is mirrored from it, so the two cannot disagree. */
+  function selectChip(chip) {
     var group = chip.closest('.swatches');
     if (!group) return;
     var chips = group.querySelectorAll('.swatch');
-    for (var i = 0; i < chips.length; i++) chips[i].classList.remove('is-active');
-    chip.classList.add('is-active');
+    for (var i = 0; i < chips.length; i++) {
+      var on = chips[i] === chip;
+      chips[i].classList.toggle('is-active', on);
+      chips[i].setAttribute('aria-pressed', on ? 'true' : 'false');
+    }
 
     var host = group.parentElement;
     var target = host && host.querySelector('button.add[data-product]');
     if (target) target.setAttribute('data-variant', chip.getAttribute('data-variant'));
+  }
+
+  var allChips = document.querySelectorAll('.swatches .swatch');
+  for (var c = 0; c < allChips.length; c++) {
+    allChips[c].setAttribute('aria-pressed',
+      allChips[c].classList.contains('is-active') ? 'true' : 'false');
+  }
+
+  document.addEventListener('click', function (event) {
+    var chip = event.target && event.target.closest ? event.target.closest('.swatch') : null;
+    if (chip) selectChip(chip);
   });
 
   /* --------------------------------------------------------- checkout --- */
@@ -344,35 +455,30 @@ function initCart() {
     event.preventDefault();
     clearErrors();
 
-    var firstBad = null;
-    for (var i = 0; i < REQUIRED_FIELDS.length; i++) {
-      var name = REQUIRED_FIELDS[i];
-      var input = form.elements[name];
-      if (!input) continue;
-      var value = String(input.value || '').trim();
-      if (!value) {
-        markInvalid(input, 'This field is required.');
-        if (!firstBad) firstBad = input;
-        continue;
-      }
-      if (name === 'email' && !EMAIL_PATTERN.test(value)) {
-        markInvalid(input, 'Enter a valid email address.');
-        if (!firstBad) firstBad = input;
-      }
+    var values = {};
+    for (var f = 0; f < form.elements.length; f++) {
+      if (form.elements[f].name) values[form.elements[f].name] = form.elements[f].value;
+    }
+    var result = validateCheckout(values);
+
+    for (var i = 0; i < result.errors.length; i++) {
+      markInvalid(form.elements[result.errors[i].name], result.errors[i].message);
     }
 
-    if (firstBad) {
-      /* The cart is deliberately untouched — a failed submit must not cost
-         the visitor anything they had already put in it. */
-      formError.textContent = 'Check the highlighted fields.';
+    if (!result.ok) {
+      /* The cart is deliberately untouched — a failed submit must not cost the
+         visitor anything they had already put in it. Unhide BEFORE writing the
+         text: a live region does not reliably announce a mutation made while
+         it is still display:none. */
       formError.hidden = false;
-      firstBad.focus();
+      formError.textContent = 'Check the highlighted fields.';
+      form.elements[result.firstInvalid].focus();
       return;
     }
 
     if (store.count() === 0) {
-      formError.textContent = 'Your cart is empty.';
       formError.hidden = false;
+      formError.textContent = 'Your cart is empty.';
       return;
     }
 
@@ -412,7 +518,9 @@ if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
     formatMoney: formatMoney,
     generateOrderNumber: generateOrderNumber,
+    validateCheckout: validateCheckout,
     initCart: initCart,
+    REQUIRED_FIELDS: REQUIRED_FIELDS,
   };
 } else {
   globalThis.formatMoney = formatMoney;

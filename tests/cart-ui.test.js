@@ -33,18 +33,44 @@ test('the badge and the drawer are written from a single render pass', () => {
 
 test('a failed submit returns before the store is touched', () => {
   const submit = cart.slice(cart.indexOf("form.addEventListener('submit'"), cart.indexOf('if (continueAfter)'));
-  const bail = submit.indexOf('if (firstBad)');
+  assert.match(submit, /validateCheckout\(values\)/,
+    'the submit handler must delegate to the tested pure validator');
+  assert.match(submit, /if \(!result\.ok\)/);
+  const bail = submit.indexOf('if (!result.ok)');
   const clearCall = submit.indexOf('store.clear()');
-  assert.ok(bail > -1, 'no firstBad branch');
+  assert.ok(bail > -1, 'no validation bail-out branch');
   assert.ok(clearCall > bail, 'store.clear() must come after the validation bail-out');
-  assert.match(submit, /firstBad\.focus\(\)/);
+  assert.match(submit, /form\.elements\[result\.firstInvalid\]\.focus\(\)/);
 });
 
 test('all five required fields and an email pattern are validated', () => {
-  assert.match(cart, /REQUIRED_FIELDS = \['name', 'email', 'address', 'city', 'postcode'\]/);
-  assert.match(cart, /EMAIL_PATTERN = \/\^\[\^\\s@\]\+@\[\^\\s@\]\+\\\.\[\^\\s@\]\+\$\//);
-  assert.match(cart, /markInvalid\(input, 'This field is required\.'\)/);
-  assert.match(cart, /markInvalid\(input, 'Enter a valid email address\.'\)/);
+  const { validateCheckout, REQUIRED_FIELDS } = require('../js/cart.js');
+  assert.deepEqual(REQUIRED_FIELDS, ['name', 'email', 'address', 'city', 'postcode']);
+
+  const empty = validateCheckout({});
+  assert.equal(empty.ok, false);
+  assert.equal(empty.errors.length, 5);
+  assert.equal(empty.firstInvalid, 'name');
+
+  const badEmail = validateCheckout({
+    name: 'Ada', email: 'nope', address: '1 Way', city: 'London', postcode: 'E1',
+  });
+  assert.equal(badEmail.ok, false);
+  assert.deepEqual(badEmail.errors, [{ name: 'email', message: 'Enter a valid email address.' }]);
+
+  const good = validateCheckout({
+    name: 'Ada', email: 'ada@example.com', address: '1 Way', city: 'London', postcode: 'E1',
+  });
+  assert.equal(good.ok, true);
+  assert.deepEqual(good.errors, []);
+  assert.equal(good.firstInvalid, null);
+
+  // whitespace-only is empty, not a value
+  assert.equal(validateCheckout({ name: '   ' }).errors[0].message, 'This field is required.');
+  // note is optional
+  assert.equal(validateCheckout({
+    name: 'Ada', email: 'ada@example.com', address: '1 Way', city: 'London', postcode: 'E1', note: '',
+  }).ok, true);
 });
 
 test('an empty cart cannot reach the order confirmation', () => {
@@ -61,7 +87,39 @@ test('the drawer opens, and closes on the button, the scrim and Escape', () => {
   assert.match(cart, /cartBtn\.addEventListener\('click', openDrawer\)/);
   assert.match(cart, /cartClose\.addEventListener\('click', closeDrawer\)/);
   assert.match(cart, /scrim\.addEventListener\('click', closeDrawer\)/);
-  assert.match(cart, /event\.key !== 'Escape'/);
+  assert.match(cart, /event\.key === 'Escape'/);
+});
+
+test('both overlays are dialogs and focus is trapped inside them', () => {
+  assert.match(html, /id="cartDrawer" role="dialog" aria-modal="true"/);
+  assert.match(html, /id="checkout" role="dialog" aria-modal="true"/);
+  assert.match(cart, /function trapTab\(container, event\)/);
+  assert.match(cart, /trapTab\(overlay, event\)/);
+  assert.match(cart, /trapTab\(drawer, event\)/);
+});
+
+test('focus survives a drawer re-render and is restored on close', () => {
+  assert.match(cart, /returnTo = \{ lineId: activeRow\.getAttribute\('data-line'\), act: act \}/);
+  assert.match(cart, /if \(btn\) btn\.focus\(\)/);
+  const closeDrawer = cart.slice(cart.indexOf('function closeDrawer'),
+                                 cart.indexOf('function closeCheckout'));
+  assert.match(closeDrawer, /cartBtn\.focus\(\)/);
+  const closeCheckout = cart.slice(cart.indexOf('function closeCheckout'),
+                                   cart.indexOf('function fieldError'));
+  assert.match(closeCheckout, /clearErrors\(\)/,
+    'errors from a previous submission must not greet the visitor on reopen');
+});
+
+test('the cart badge is announced instead of being hidden by an aria-label', () => {
+  assert.ok(!/id="cartBtn" aria-label/.test(html),
+    'aria-label would override the subtree and hide the count');
+  assert.match(html, /id="cartCount" aria-live="polite"/);
+});
+
+test('variant selection is exposed to assistive tech, not just coloured', () => {
+  assert.match(cart, /aria-pressed/);
+  assert.match(cart, /function selectChip\(chip\)/);
+  assert.match(cart, /chips\[i\]\.classList\.toggle\('is-active', on\)/);
 });
 
 test('scroll lock is a dedicated state, not a reuse of the age-gate class', () => {

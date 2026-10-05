@@ -106,8 +106,10 @@ function prefersReduced() {
 function setHud(section) {
   var name = section.getAttribute('data-name');
   var marker = section.querySelector('[data-marker]');
-  if (name) document.getElementById('sectionName').textContent = name;
-  if (marker) document.getElementById('chapterMarker').textContent = marker.textContent;
+  var nameEl = document.getElementById('sectionName');
+  var markerEl = document.getElementById('chapterMarker');
+  if (name && nameEl) nameEl.textContent = name;
+  if (marker && markerEl) markerEl.textContent = marker.textContent;
 }
 
 function hudFromScroll() {
@@ -128,7 +130,9 @@ function hudFromScroll() {
    ScrollTrigger — when the visitor prefers reduced motion. */
 
 function initScroll() {
-  if (typeof window.gsap === 'undefined' || typeof window.ScrollTrigger === 'undefined') return;
+  if (typeof window.gsap === 'undefined' ||
+      typeof window.ScrollTrigger === 'undefined' ||
+      typeof window.Lenis === 'undefined') return;
 
   window.gsap.registerPlugin(window.ScrollTrigger);
   var gsap = window.gsap;
@@ -221,6 +225,16 @@ function initScroll() {
      and the bottom third of the page would be unreachable. Re-measure. */
   ScrollTrigger.refresh();
   lenis.resize();
+
+  /* Webfonts land after this. A refresh re-runs invalidateOnRefresh, which
+     re-evaluates the chapter copy's function-valued travel against the real
+     Instrument Serif metrics instead of the Times fallback. */
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(function () {
+      ScrollTrigger.refresh();
+      lenis.resize();
+    });
+  }
 }
 
 /* ------------------------------------------------------ chapters ---- */
@@ -241,7 +255,6 @@ function chapterOverflow(section, copy) {
 function chapterFrame(section, extra) {
   section.classList.add('is-pinned');
   var copy = section.querySelector('.chapter__copy');
-  var over = chapterOverflow(section, copy);
   var tl = gsap.timeline({
     defaults: { ease: 'none' },
     scrollTrigger: {
@@ -251,9 +264,17 @@ function chapterFrame(section, extra) {
       pin: true,
       pinSpacing: true,
       scrub: true,
+      /* Re-evaluates the function-valued tween below on every refresh. */
+      invalidateOnRefresh: true,
     },
   });
-  tl.to(copy, { y: -over, duration: 1 }, 0);
+  /* Resolved as a FUNCTION rather than a number captured at DOMContentLoaded:
+     the display font has not swapped in yet at that point, so a measurement
+     taken then is about one display line short. */
+  tl.to(copy, {
+    y: function () { return -chapterOverflow(section, copy); },
+    duration: 1,
+  }, 0);
   return tl;
 }
 

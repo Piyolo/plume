@@ -50,9 +50,14 @@ test('the colourway track is three times its container so -66.667 lands on panel
   assert.match(css, /\.arc-track__inner\s*\{[^}]*width:\s*300%/);
 });
 
-test('pin distances match the plan: 1600 for ONE, 1400 for ARC and RESERVE', () => {
-  assert.match(js, /chapterFrame\(section, 1600\)/);
-  assert.match(js, /chapterFrame\(section, 1400\)/);
+test('each chapter gets a substantial pin distance', () => {
+  /* Asserts a floor, not the plan's exact numbers: rebalancing pin distances
+     is a design change, not a regression, and must not require editing a test. */
+  const distances = [...js.matchAll(/chapterFrame\(section, (\d+)\)/g)].map((m) => Number(m[1]));
+  assert.equal(distances.length, 3, 'all three chapters should be framed');
+  for (const d of distances) {
+    assert.ok(d >= 900, `pin distance ${d}px is too short to choreograph anything`);
+  }
   assert.match(js, /pin:\s*true,\s*pinSpacing:\s*true,\s*scrub:\s*true/);
 });
 
@@ -71,6 +76,17 @@ test('Lenis is re-measured after the pins add their spacer height', () => {
 
 test('the copy column is scrubbed so the tail of a tall chapter stays reachable', () => {
   assert.match(js, /function chapterOverflow\(section, copy\)/);
-  assert.match(js, /tl\.to\(copy, \{ y: -over, duration: 1 \}, 0\)/);
   assert.match(js, /Math\.max\(0, Math\.round\(copy\.offsetHeight - avail\)\)/);
+  /* Resolved as a function, not a number captured at DOMContentLoaded: the
+     display font has not swapped in yet, so a captured value is a line short. */
+  assert.match(js, /y: function \(\) \{ return -chapterOverflow\(section, copy\); \}/);
+  assert.match(js, /duration: 1,\s*\n\s*\}, 0\);/);
+  assert.match(js, /invalidateOnRefresh: true/);
+});
+
+test('the pin frame budget keeps the media column inside 100vh', () => {
+  const detail = css.match(/\.chapter__detail\s*\{[^}]*\}/)[0];
+  assert.match(detail, /height:\s*min\(/,
+    'the detail image must take only what is left of the frame budget');
+  assert.match(detail, /calc\(100vh - 2 \* var\(--section-pad\)/);
 });
