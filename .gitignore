@@ -1,0 +1,19 @@
+# dependencies (there are none at runtime, but keep this honest)
+node_modules/
+
+# Vercel
+.vercel/
+
+# local environment / secrets — never commit these
+.env
+.env.*
+!.env.example
+
+# OS noise
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# logs
+*.log
+npm-debug.log*

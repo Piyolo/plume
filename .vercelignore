@@ -1,0 +1,12 @@
+# Only the site itself needs to be deployed. The spec, plan, tests and the
+# superpowers working directory are repository history, not runtime assets.
+.git
+.github
+tests
+docs
+.superpowers
+node_modules
+*.md
+.vercel
+.env
+.env.*
