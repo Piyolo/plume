@@ -93,9 +93,127 @@ function initImageFallback() {
   }
 }
 
+/* ------------------------------------------------- reduced motion --- */
+/* Spec §4: prefers-reduced-motion releases every pin, kills all parallax
+   and leaves the page in normal flow with all content visible. */
+
+function prefersReduced() {
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+/* ------------------------------------------------------- HUD label --- */
+
+function setHud(section) {
+  var name = section.getAttribute('data-name');
+  var marker = section.querySelector('[data-marker]');
+  if (name) document.getElementById('sectionName').textContent = name;
+  if (marker) document.getElementById('chapterMarker').textContent = marker.textContent;
+}
+
+function hudFromScroll() {
+  var mid = window.innerHeight / 2;
+  var sections = document.querySelectorAll('main section[data-name]');
+  for (var i = 0; i < sections.length; i++) {
+    var box = sections[i].getBoundingClientRect();
+    if (box.top <= mid && box.bottom > mid) {
+      setHud(sections[i]);
+      return;
+    }
+  }
+}
+
+/* -------------------------------------------------------- scroll ---- */
+/* One entry point: starts Lenis, binds it to ScrollTrigger, then registers
+   reveals, parallax and HUD sync. Returns early — no Lenis, no
+   ScrollTrigger — when the visitor prefers reduced motion. */
+
+function initScroll() {
+  if (typeof window.gsap === 'undefined' || typeof window.ScrollTrigger === 'undefined') return;
+
+  window.gsap.registerPlugin(window.ScrollTrigger);
+  var gsap = window.gsap;
+  var ScrollTrigger = window.ScrollTrigger;
+
+  /* --- Step 1: reduced-motion branch, checked first --- */
+  if (prefersReduced()) {
+    var revealEls = document.querySelectorAll('.reveal');
+    for (var i = 0; i < revealEls.length; i++) {
+      revealEls[i].style.opacity = '1';
+      revealEls[i].style.transform = 'none';
+    }
+    /* No motion, but the HUD label is content, not animation — keep it true. */
+    hudFromScroll();
+    window.addEventListener('scroll', hudFromScroll, { passive: true });
+    return;
+  }
+
+  /* --- Step 2: Lenis bound to the ScrollTrigger ticker --- */
+  var lenis = new window.Lenis({ duration: 1.1, smoothWheel: true });
+  window.__lenis = lenis;
+  lenis.on('scroll', ScrollTrigger.update);
+  gsap.ticker.add(function (time) { lenis.raf(time * 1000); });
+  gsap.ticker.lagSmoothing(0);
+  ScrollTrigger.refresh();
+
+  window.addEventListener('load', function () { ScrollTrigger.refresh(); });
+
+  /* Anchor links must route through Lenis. A stale href (no target) would
+     otherwise leave the visitor on a dead link, so it falls back to the top. */
+  document.addEventListener('click', function (event) {
+    var anchor = event.target && event.target.closest ? event.target.closest('a[href^="#"]') : null;
+    if (!anchor) return;
+    var href = anchor.getAttribute('href');
+    if (!href || href === '#') return;
+    event.preventDefault();
+    var target = null;
+    try { target = document.querySelector(href); } catch (err) { target = null; }
+    lenis.scrollTo(target || 0, { offset: -64 });
+  });
+
+  /* --- Step 3: hero stagger, reveals, parallax, HUD sync --- */
+  gsap.from('.hero__eyebrow, .hero__word, .hero__tag, .hero__sub', {
+    y: 32,
+    opacity: 0,
+    duration: 1.1,
+    ease: 'power2.out',
+    stagger: 0.08,
+    delay: 0.12,
+  });
+
+  gsap.utils.toArray('.reveal').forEach(function (el) {
+    gsap.to(el, {
+      y: 0,
+      opacity: 1,
+      duration: 1.1,
+      ease: 'power2.out',
+      scrollTrigger: { trigger: el, start: 'top 85%', once: true },
+    });
+  });
+
+  gsap.utils.toArray('[data-parallax]').forEach(function (el) {
+    var section = el.closest('section') || document.body;
+    gsap.fromTo(el, { yPercent: -12 }, {
+      yPercent: 12,
+      ease: 'none',
+      scrollTrigger: { trigger: section, start: 'top bottom', end: 'bottom top', scrub: true },
+    });
+  });
+
+  gsap.utils.toArray('main section[data-name]').forEach(function (section) {
+    ScrollTrigger.create({
+      trigger: section,
+      start: 'top center',
+      end: 'bottom center',
+      onEnter: function () { setHud(section); },
+      onEnterBack: function () { setHud(section); },
+    });
+  });
+}
+
 /* ---------------------------------------------------------------- boot --- */
 
 document.addEventListener('DOMContentLoaded', function () {
   initAgeGate();
   initImageFallback();
+  initScroll();
 });
