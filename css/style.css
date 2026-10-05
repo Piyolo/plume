@@ -377,11 +377,22 @@ section { position: relative; }
   align-items: start;
 }
 
+/* Spec §4: ScrollTrigger owns pinning; Lenis only interpolates scroll. Native
+   `position: sticky` is deliberately NOT used here — it is what spec §7 warns
+   about ("Lenis and native sticky can fight"). JS adds `.is-pinned` only when
+   a pin is actually active (>=768px, motion allowed), so without JS or under
+   reduced motion the chapter is an ordinary block in normal flow. */
+.chapter.is-pinned {
+  height: 100vh;
+  overflow: hidden;
+}
+
+.chapter__copy { will-change: transform; }
+
 .chapter__media {
-  position: sticky;
-  top: clamp(5rem, 12vh, 8rem);
   display: grid;
   gap: 1rem;
+  align-content: start;
 }
 
 .chapter__hero {
@@ -502,7 +513,10 @@ section { position: relative; }
 
 .arc-track__inner {
   display: grid;
-  grid-template-columns: repeat(3, 100%);
+  /* Three panels each one viewport-of-track wide: the track is 3x its
+     container, so xPercent: -66.667 lands exactly on the third panel. */
+  grid-template-columns: repeat(3, 1fr);
+  width: 300%;
   will-change: transform;
 }
 
@@ -539,6 +553,48 @@ section { position: relative; }
 }
 
 .flavour__note { color: var(--muted); font-size: .9rem; }
+
+/* Pinned only: the three cards become an overlapping deck that deals itself
+   in as the scrub advances. Un-pinned (mobile, no JS, reduced motion) they
+   stay an ordinary stacked list — nothing is ever clipped away. */
+.is-pinned .flavours {
+  position: relative;
+  height: 175px;
+  overflow: hidden;
+}
+
+.is-pinned .flavour {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 80px;
+}
+
+/* Tasting notes exist only for the cross-fade inside a pin; below 768px the
+   flavour cards already carry their own note, so this is hidden outright. */
+.tasting { display: none; }
+
+.is-pinned .tasting {
+  display: block;
+  position: relative;
+  height: 1.6rem;
+  margin-top: 1.1rem;
+}
+
+.tasting__note {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.1rem;
+  color: var(--muted);
+}
+
+.is-pinned .tasting__note {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+}
+
+.is-pinned .tasting__note:first-child { opacity: 1; }
 
 /* ==========================================================================
    Range

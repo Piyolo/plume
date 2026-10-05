@@ -155,7 +155,10 @@ function initScroll() {
   gsap.ticker.lagSmoothing(0);
   ScrollTrigger.refresh();
 
-  window.addEventListener('load', function () { ScrollTrigger.refresh(); });
+  window.addEventListener('load', function () {
+    ScrollTrigger.refresh();
+    lenis.resize();
+  });
 
   /* Anchor links must route through Lenis. A stale href (no target) would
      otherwise leave the visitor on a dead link, so it falls back to the top. */
@@ -207,6 +210,154 @@ function initScroll() {
       onEnter: function () { setHud(section); },
       onEnterBack: function () { setHud(section); },
     });
+  });
+
+  initChapterOne();
+  initChapterArc();
+  initChapterReserve();
+
+  /* The pinned chapters add roughly 4,600px of pin-spacer height AFTER Lenis
+     measured the document, so Lenis would clamp scrolling to its stale limit
+     and the bottom third of the page would be unreachable. Re-measure. */
+  ScrollTrigger.refresh();
+  lenis.resize();
+}
+
+/* ------------------------------------------------------ chapters ---- */
+/* Spec §3: "device held stationary while spec callouts and imagery scrub
+   past". Every chapter is taller than its viewport (measured: 930–1265px on
+   a 900px desktop, 1567–1943px on an 844px phone), so the SECTION cannot be
+   pinned as-is — its tail would be unreachable. Instead JS gives the chapter
+   a fixed 100vh frame and scrubs the copy column through it: the device
+   holds still, the callouts travel. Below 768px no frame is applied at all
+   and the chapter is ordinary flow. */
+
+function chapterOverflow(section, copy) {
+  var cs = window.getComputedStyle(section);
+  var avail = section.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+  return Math.max(0, Math.round(copy.offsetHeight - avail));
+}
+
+function chapterFrame(section, extra) {
+  section.classList.add('is-pinned');
+  var copy = section.querySelector('.chapter__copy');
+  var over = chapterOverflow(section, copy);
+  var tl = gsap.timeline({
+    defaults: { ease: 'none' },
+    scrollTrigger: {
+      trigger: section,
+      start: 'top top',
+      end: '+=' + extra,
+      pin: true,
+      pinSpacing: true,
+      scrub: true,
+    },
+  });
+  tl.to(copy, { y: -over, duration: 1 }, 0);
+  return tl;
+}
+
+function chapterRelease(section, targets) {
+  section.classList.remove('is-pinned');
+  gsap.set(targets, { clearProps: 'all' });
+}
+
+function initChapterOne() {
+  if (prefersReduced()) return;
+  var section = document.getElementById('chapter-one');
+  if (!section) return;
+
+  gsap.matchMedia().add('(min-width: 768px)', function () {
+    var copy = section.querySelector('.chapter__copy');
+    var hero = section.querySelector('.chapter__hero');
+    var rows = gsap.utils.toArray(section.querySelectorAll('.specs__row'));
+    var price = section.querySelector('.chapter__price');
+
+    var tl = chapterFrame(section, 1600);
+    tl.to(hero, { scale: 1.08, duration: 1 }, 0);
+    gsap.set(rows, { opacity: 0, y: 24 });
+    gsap.set(price, { opacity: 0, y: 20 });
+    [0.15, 0.35, 0.55, 0.75].forEach(function (at, i) {
+      if (rows[i]) tl.to(rows[i], { opacity: 1, y: 0, duration: 0.1, ease: 'power2.out' }, at);
+    });
+    tl.to(price, { opacity: 1, y: 0, duration: 0.1, ease: 'power2.out' }, 0.88);
+    tl.to({}, { duration: 0.0001 }, 1);
+
+    ScrollTrigger.refresh();
+    return function () { chapterRelease(section, rows.concat([price, copy, hero])); };
+  });
+}
+
+function initChapterArc() {
+  if (prefersReduced()) return;
+  var section = document.getElementById('chapter-arc');
+  if (!section) return;
+  var track = section.querySelector('.arc-track__inner');
+  var captions = gsap.utils.toArray(section.querySelectorAll('.arc-panel span'));
+
+  gsap.matchMedia().add('(min-width: 768px)', function () {
+    var copy = section.querySelector('.chapter__copy');
+    if (captions.length > 1) gsap.set(captions.slice(1), { opacity: 0 });
+
+    var tl = chapterFrame(section, 1400);
+    tl.to(track, { xPercent: -66.6667, duration: 1 }, 0);
+    /* each caption cross-fades as its own panel's centre reaches centre */
+    if (captions[0]) tl.to(captions[0], { opacity: 0, duration: 0.12 }, 0.30);
+    if (captions[1]) {
+      tl.to(captions[1], { opacity: 1, duration: 0.12 }, 0.28);
+      tl.to(captions[1], { opacity: 0, duration: 0.12 }, 0.60);
+    }
+    if (captions[2]) tl.to(captions[2], { opacity: 1, duration: 0.12 }, 0.58);
+    tl.to({}, { duration: 0.0001 }, 1);
+
+    ScrollTrigger.refresh();
+    return function () { chapterRelease(section, [copy, track].concat(captions)); };
+  });
+
+  /* Below 768px the chapter is not pinned, but the colourway track still
+     slides on natural scroll. Below 480px CSS hides it entirely — no
+     ScrollTrigger is created for a display:none box. */
+  gsap.matchMedia().add('(max-width: 767px)', function () {
+    if (!track || track.offsetParent === null) return;
+    var tween = gsap.to(track, {
+      xPercent: -66.6667,
+      ease: 'none',
+      scrollTrigger: { trigger: section, start: 'top center', end: 'bottom bottom', scrub: true },
+    });
+    return function () {
+      if (tween.scrollTrigger) tween.scrollTrigger.kill();
+      tween.kill();
+      gsap.set(track, { clearProps: 'all' });
+    };
+  });
+}
+
+function initChapterReserve() {
+  if (prefersReduced()) return;
+  var section = document.getElementById('chapter-reserve');
+  if (!section) return;
+  var cards = gsap.utils.toArray(section.querySelectorAll('.flavour'));
+  var notes = gsap.utils.toArray(section.querySelectorAll('.tasting__note'));
+
+  gsap.matchMedia().add('(min-width: 768px)', function () {
+    var copy = section.querySelector('.chapter__copy');
+    gsap.set(cards, { opacity: 0, y: 80 });
+    if (notes.length > 1) gsap.set(notes.slice(1), { opacity: 0 });
+
+    var tl = chapterFrame(section, 1400);
+    cards.forEach(function (card, i) {
+      tl.to(card, { y: -40 * i, opacity: 1, duration: 0.18, ease: 'power2.out' }, 0.15 + i * 0.2);
+    });
+    if (notes.length === 3) {
+      tl.to(notes[0], { opacity: 0, duration: 0.1 }, 0.32);
+      tl.to(notes[1], { opacity: 1, duration: 0.1 }, 0.32);
+      tl.to(notes[1], { opacity: 0, duration: 0.1 }, 0.55);
+      tl.to(notes[2], { opacity: 1, duration: 0.1 }, 0.55);
+    }
+    tl.to({}, { duration: 0.0001 }, 1);
+
+    ScrollTrigger.refresh();
+    return function () { chapterRelease(section, cards.concat([copy]).concat(notes)); };
   });
 }
 
