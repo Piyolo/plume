@@ -80,7 +80,9 @@ test('the scrim exists, sits between the HUD and the drawer, and starts hidden',
 });
 
 test('per-field inline messages and the badge bump are styled', () => {
-  assert.match(css, /\.field__msg\s*\{[^}]*color:\s*var\(--ember\)/);
+  assert.match(css, /\.field__msg\s*\{[^}]*color:/);
+  assert.ok(!/\.field__msg\s*\{[^}]*--ember/.test(css),
+    'spec §4 forbids ember as UI, including error text');
   assert.match(css, /@keyframes badge-bump/);
   assert.match(css, /\.hud__count\.is-bump\s*\{\s*animation:/);
 });

@@ -61,3 +61,30 @@ test('reduced motion releases the reveals and all transforms', () => {
   assert.match(block[0], /\.reveal\s*\{[^}]*opacity:\s*1\s*!important/);
   assert.match(block[0], /\.reveal\s*\{[^}]*transform:\s*none\s*!important/);
 });
+
+test('ember red is a product colourway and never UI (spec §4)', () => {
+  const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+  // strip comments so prose about ember cannot look like a declaration
+  const code = css.replace(/\/\*[\s\S]*?\*\//g, '');
+  const offenders = [...code.matchAll(/^\s*([a-z-]+)\s*:[^;{}]*--ember[^;{}]*;/gim)]
+    .map((m) => m[1])
+    .filter((prop) => prop !== '--ember');
+  assert.deepEqual(offenders, [],
+    'ember must not colour any UI property, found: ' + offenders.join(', '));
+  assert.match(css, /--ember:\s*#D9482B/);
+  assert.ok(html.includes('--sw:#D9482B'),
+    'ember should still appear as the Ember product colourway swatch');
+});
+
+test('the mobile hero reserves room for its absolutely positioned scroll cue', () => {
+  const mobile = css.match(/@media \(max-width: 767px\)\s*\{[\s\S]*?\n\}/);
+  assert.ok(mobile, 'no 767px block');
+  assert.match(mobile[0], /#hero\s*\{[^}]*padding-bottom:\s*clamp\(\s*6\.5rem/,
+    'the cue is absolutely positioned and needs reserved space beneath the copy');
+});
+
+test('the arc colourway caption blends from white so it stays legible on every panel', () => {
+  assert.match(css, /\.arc-panel span\s*\{\s*color:\s*#fff;\s*mix-blend-mode:\s*difference/);
+  assert.ok(!/\.arc-panel span\s*\{[^}]*color:\s*var\(--bg\)/.test(css),
+    'a near-black source is invisible on the near-black Onyx panel');
+});

@@ -530,7 +530,10 @@ section { position: relative; }
   padding: 1rem;
 }
 
-.arc-panel span { color: var(--bg); mix-blend-mode: difference; }
+/* The caption must adapt to a panel that ranges from near-black to near-white.
+   `difference` only does that when the source is pure white: a near-black
+   source over the near-black Onyx panel yields near-black on near-black. */
+.arc-panel span { color: #fff; mix-blend-mode: difference; }
 
 /* --- flavours ----------------------------------------------------------- */
 
@@ -767,7 +770,10 @@ body.is-locked { overflow: hidden; }
   font-size: .68rem;
   letter-spacing: .04em;
   text-transform: none;
-  color: var(--ember);
+  /* Spec §4: "Ember red may appear solely as a product colourway swatch,
+     never as UI." The error state is therefore signalled with the text colour
+     plus aria-invalid and focus, never with a second hue. */
+  color: var(--text);
 }
 
 .drawer {
@@ -854,7 +860,7 @@ body.is-locked { overflow: hidden; }
   cursor: pointer;
 }
 
-.line__remove:hover { color: var(--ember); }
+.line__remove:hover { color: var(--text); }
 
 .drawer__foot {
   border-top: 1px solid var(--line);
@@ -934,11 +940,12 @@ body.is-locked { overflow: hidden; }
 .field textarea:focus { outline: none; border-color: var(--accent); }
 
 .field.is-invalid input,
-.field.is-invalid textarea { border-color: var(--ember); }
+.field.is-invalid textarea { border-color: var(--text); }
 
 .field__error {
   grid-column: 1 / -1;
-  color: var(--ember);
+  /* spec §4: ember is a product colourway, never UI */
+  color: var(--text);
   font-family: var(--font-mono);
   font-size: .72rem;
   letter-spacing: .06em;
@@ -1031,6 +1038,9 @@ body.is-locked { overflow: hidden; }
     grid-template-columns: 1fr;
     min-height: auto;
     padding-top: clamp(5.5rem, 16vh, 8rem);
+    /* the scroll cue is absolutely positioned and ~74px tall including its
+       rule; without this the last line of hero copy collides with it */
+    padding-bottom: clamp(6.5rem, 13vh, 8rem);
   }
   .hero__copy, .hero__media { grid-column: 1; grid-row: auto; }
   .hero__media { order: -1; }
