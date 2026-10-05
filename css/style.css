@@ -1,0 +1,27 @@
+/* ==========================================================================
+   PLUME — design tokens
+   Spec: docs/superpowers/specs/2026-10-05-vape-showcase-design.md §4
+   ========================================================================== */
+
+:root {
+  /* palette — one accent only; ember red is a product swatch, never UI */
+  --bg: #0A0A0B;
+  --surface: #131315;
+  --text: #F3F0EA;
+  --muted: #8B887F;
+  --line: rgba(243, 240, 234, .14);
+  --accent: #E8B84B;
+  --ember: #D9482B; /* product colourway only */
+
+  /* type */
+  --font-display: 'Instrument Serif', 'Times New Roman', serif;
+  --font-body: 'Space Grotesk', 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', 'SFMono-Regular', Consolas, monospace;
+
+  /* stacking — decided in the pre-flight scan */
+  --z-grain: 40;
+  --z-hud: 50;
+  --z-drawer: 60;
+  --z-checkout: 70;
+  --z-gate: 90;
+}
