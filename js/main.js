@@ -367,4 +367,5 @@ document.addEventListener('DOMContentLoaded', function () {
   initAgeGate();
   initImageFallback();
   initScroll();
+  initCart();
 });

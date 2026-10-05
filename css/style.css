@@ -735,6 +735,41 @@ section { position: relative; }
    Cart drawer
    ========================================================================== */
 
+/* Scroll lock shared by the drawer and the checkout. Separate from
+   `.is-gated` on purpose: the age gate and the cart are different states and
+   must never be conflated when one opens while the other is already open. */
+body.is-locked { overflow: hidden; }
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 55; /* above the HUD (50), below the drawer (60) */
+  background: rgba(10, 10, 11, .72);
+  backdrop-filter: blur(2px);
+}
+
+@keyframes badge-bump {
+  0% { transform: scale(1); }
+  35% { transform: scale(1.45); }
+  100% { transform: scale(1); }
+}
+
+.hud__count.is-bump { animation: badge-bump .45s ease; }
+
+.btn:disabled,
+.checkoutBtn:disabled {
+  opacity: .4;
+  cursor: not-allowed;
+}
+
+.field__msg {
+  font-family: var(--font-mono);
+  font-size: .68rem;
+  letter-spacing: .04em;
+  text-transform: none;
+  color: var(--ember);
+}
+
 .drawer {
   position: fixed;
   top: 0;
