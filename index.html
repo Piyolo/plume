@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>PLUME — Vapour, refined.</title>
-<meta name="description" content="PLUME. A design demo: a scroll-driven showcase for a fictional premium vape brand. No products are sold.">
+<meta name="description" content="PLUME. A design demo: a scroll-driven showcase for a fictional premium vape brand. No products are sold and no order is placed.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%97%88%3C/text%3E%3C/svg%3E">
 <link rel="stylesheet" href="assets/fonts/fonts.css">
 <link rel="stylesheet" href="css/style.css">
@@ -34,6 +34,361 @@
     </div>
   </div>
 </div>
+
+<div class="grain" aria-hidden="true"></div>
+
+<!-- ======================================================= HUD ===== -->
+<header class="hud">
+  <a class="hud__brand" href="#hero">PLUME</a>
+  <p class="hud__section" id="sectionName">INTRODUCTION</p>
+  <div class="hud__right">
+    <span class="hud__marker mono" id="chapterMarker" aria-hidden="true">00 / 07</span>
+    <button type="button" class="hud__cart" id="cartBtn" aria-label="Open cart">
+      Cart<span class="hud__count mono" id="cartCount" hidden>0</span>
+    </button>
+  </div>
+</header>
+
+<main>
+
+<!-- ===================================================== HERO ===== -->
+<section id="hero" data-name="INTRODUCTION">
+  <p class="marker mono" data-marker>00 / 07</p>
+
+  <div class="hero__media">
+    <img src="assets/img/hero-device.jpg" alt="A dark vape device lit from behind against black" data-parallax>
+  </div>
+
+  <div class="hero__copy">
+    <p class="hero__eyebrow mono">EST. MMXXVI · A DESIGN DEMO</p>
+    <h1 class="hero__word">PLUME</h1>
+    <p class="hero__tag">Vapour, refined.</p>
+    <p class="hero__sub">Three objects. One page. No server.</p>
+  </div>
+
+  <p class="hero__cue mono">Scroll</p>
+</section>
+
+<!-- ================================================ MANIFESTO ===== -->
+<section id="manifesto" data-name="MANIFESTO">
+  <p class="marker mono" data-marker>01 / 07</p>
+
+  <img class="manifesto__plate" src="assets/img/manifesto-plate.jpg" alt="A single wisp of vapour on black" data-parallax>
+
+  <div class="manifesto__copy">
+    <p class="manifesto__line reveal">We don&#39;t make vaporisers.</p>
+    <p class="manifesto__line reveal">We make the object you leave on the table.</p>
+    <p class="manifesto__line reveal">Three of them — machined, steeped, sealed.</p>
+    <p class="manifesto__body reveal">Everything below this line is a demonstration: a page that
+      moves with your scroll, a cart that remembers, a checkout that finishes. Nothing is
+      sold, nothing is sent, nothing leaves your browser.</p>
+  </div>
+</section>
+
+<!-- ============================================ CHAPTER 01 · ONE == -->
+<section id="chapter-one" class="chapter" data-name="PLUME ONE" data-product="plume-one">
+  <p class="marker mono" data-marker>02 / 07</p>
+
+  <div class="chapter__media">
+    <img class="chapter__hero" src="assets/img/one-hero.jpg" alt="PLUME ONE pod device on black">
+    <img class="chapter__detail" src="assets/img/one-detail.jpg" alt="PLUME ONE detail, dark finish">
+  </div>
+
+  <div class="chapter__copy">
+    <p class="chapter__index mono">CHAPTER 01</p>
+    <h2 class="chapter__name">PLUME ONE</h2>
+    <p class="chapter__tag">Weighted, sealed, silent.</p>
+    <p class="chapter__price" data-price="6400">$64</p>
+    <p class="chapter__desc">A refillable pod system machined from a single billet of
+      aluminium, tuned for a draw that never wanders.</p>
+
+    <dl class="specs">
+      <div class="specs__row"><dt class="mono">BATTERY</dt><dd>900 mAh</dd></div>
+      <div class="specs__row"><dt class="mono">CHARGE</dt><dd>USB-C · 45 min</dd></div>
+      <div class="specs__row"><dt class="mono">POD</dt><dd>2 ml refillable</dd></div>
+      <div class="specs__row"><dt class="mono">WEIGHT</dt><dd>48 g</dd></div>
+    </dl>
+
+    <div class="swatches" role="group" aria-label="PLUME ONE finishes">
+      <button type="button" class="swatch is-active" data-variant="graphite" style="--sw:#3A3A3C">Graphite</button>
+      <button type="button" class="swatch" data-variant="silver" style="--sw:#C7C7CC">Silver</button>
+      <button type="button" class="swatch" data-variant="ember" style="--sw:#D9482B">Ember</button>
+    </div>
+
+    <button type="button" class="btn btn--solid add" data-product="plume-one" data-variant="graphite" data-price="6400">
+      Add to cart · $64
+    </button>
+  </div>
+</section>
+
+<!-- ============================================ CHAPTER 02 · ARC == -->
+<section id="chapter-arc" class="chapter" data-name="PLUME ARC" data-product="plume-arc">
+  <p class="marker mono" data-marker>03 / 07</p>
+
+  <div class="chapter__media">
+    <img class="chapter__hero" src="assets/img/arc-hero.jpg" alt="PLUME ARC slim device in a shaft of light">
+    <img class="chapter__detail" src="assets/img/arc-detail.jpg" alt="PLUME ARC in vapour">
+  </div>
+
+  <div class="chapter__copy">
+    <p class="chapter__index mono">CHAPTER 02</p>
+    <h2 class="chapter__name">PLUME ARC</h2>
+    <p class="chapter__tag">Six hundred draws, no buttons.</p>
+    <p class="chapter__price" data-price="2200">$22</p>
+    <p class="chapter__desc">A sealed ten-millilitre device that ships charged, draws soft,
+      and disappears into a pocket.</p>
+
+    <dl class="specs">
+      <div class="specs__row"><dt class="mono">E-LIQUID</dt><dd>10 ml</dd></div>
+      <div class="specs__row"><dt class="mono">PUFFS</dt><dd>≈ 600</dd></div>
+      <div class="specs__row"><dt class="mono">NICOTINE</dt><dd>20 mg/ml</dd></div>
+      <div class="specs__row"><dt class="mono">WEIGHT</dt><dd>32 g</dd></div>
+    </dl>
+
+    <div class="arc-track" aria-hidden="true">
+      <div class="arc-track__inner">
+        <div class="arc-panel" style="--sw:#141416"><span class="mono">ONYX</span></div>
+        <div class="arc-panel" style="--sw:#EDEDE8"><span class="mono">CHALK</span></div>
+        <div class="arc-panel" style="--sw:#E8B84B"><span class="mono">GOLD</span></div>
+      </div>
+    </div>
+
+    <div class="swatches" role="group" aria-label="PLUME ARC colourways">
+      <button type="button" class="swatch is-active" data-variant="onyx" style="--sw:#141416">Onyx</button>
+      <button type="button" class="swatch" data-variant="chalk" style="--sw:#EDEDE8">Chalk</button>
+      <button type="button" class="swatch" data-variant="gold" style="--sw:#E8B84B">Gold</button>
+    </div>
+
+    <button type="button" class="btn btn--solid add" data-product="plume-arc" data-variant="onyx" data-price="2200">
+      Add to cart · $22
+    </button>
+  </div>
+</section>
+
+<!-- ======================================= CHAPTER 03 · RESERVE == -->
+<section id="chapter-reserve" class="chapter" data-name="PLUME RESERVE" data-product="plume-reserve">
+  <p class="marker mono" data-marker>04 / 07</p>
+
+  <div class="chapter__media">
+    <img class="chapter__hero" src="assets/img/reserve-hero.jpg" alt="PLUME RESERVE bottle on dark wood">
+    <img class="chapter__detail" src="assets/img/reserve-detail.jpg" alt="PLUME RESERVE bottles in warm light">
+  </div>
+
+  <div class="chapter__copy">
+    <p class="chapter__index mono">CHAPTER 03</p>
+    <h2 class="chapter__name">PLUME RESERVE</h2>
+    <p class="chapter__tag">Steeped small. Poured slow.</p>
+    <p class="chapter__price" data-price="1800">$18</p>
+    <p class="chapter__desc">Three nicotine-salt blends steeped in small batches and bottled
+      the week they are ready.</p>
+
+    <dl class="specs">
+      <div class="specs__row"><dt class="mono">NICOTINE</dt><dd>20 mg/ml</dd></div>
+      <div class="specs__row"><dt class="mono">VG / PG</dt><dd>50 / 50</dd></div>
+      <div class="specs__row"><dt class="mono">SIZE</dt><dd>10 ml</dd></div>
+      <div class="specs__row"><dt class="mono">BOTTLED</dt><dd>EU, in-house</dd></div>
+    </dl>
+
+    <div class="flavours">
+      <div class="flavour" data-flavour="blackcurrant-mint" style="--sw:#6B3FA0">
+        <p class="flavour__name">Blackcurrant Mint</p>
+        <p class="flavour__note">Dark berry, cold finish.</p>
+      </div>
+      <div class="flavour" data-flavour="vanilla-bourbon" style="--sw:#B07C3A">
+        <p class="flavour__name">Vanilla Bourbon</p>
+        <p class="flavour__note">Soft vanilla, oak backend.</p>
+      </div>
+      <div class="flavour" data-flavour="citrus-ice" style="--sw:#3FA0A5">
+        <p class="flavour__name">Citrus Ice</p>
+        <p class="flavour__note">Sharp peel, glacial tail.</p>
+      </div>
+    </div>
+
+    <div class="swatches" role="group" aria-label="PLUME RESERVE flavours">
+      <button type="button" class="swatch is-active" data-variant="blackcurrant-mint" style="--sw:#6B3FA0">Blackcurrant Mint</button>
+      <button type="button" class="swatch" data-variant="vanilla-bourbon" style="--sw:#B07C3A">Vanilla Bourbon</button>
+      <button type="button" class="swatch" data-variant="citrus-ice" style="--sw:#3FA0A5">Citrus Ice</button>
+    </div>
+
+    <button type="button" class="btn btn--solid add" data-product="plume-reserve" data-variant="blackcurrant-mint" data-price="1800">
+      Add to cart · $18
+    </button>
+  </div>
+</section>
+
+<!-- ================================================ THE RANGE ===== -->
+<section id="range" data-name="THE RANGE">
+  <p class="marker mono" data-marker>05 / 07</p>
+
+  <header class="range__head">
+    <h2 class="section-title">The range</h2>
+    <p class="section-sub">Three objects. Same accent, same hairlines, same price honesty.</p>
+  </header>
+
+  <div class="range__grid">
+    <article class="card reveal" data-card="plume-one">
+      <img src="assets/img/one-hero.jpg" alt="PLUME ONE">
+      <div class="card__body">
+        <p class="card__index mono">01</p>
+        <h3 class="card__name">PLUME ONE</h3>
+        <p class="card__tag">Weighted, sealed, silent.</p>
+        <p class="card__price" data-price="6400">$64</p>
+        <div class="swatches swatches--small" role="group" aria-label="PLUME ONE finishes">
+          <button type="button" class="swatch is-active" data-variant="graphite" style="--sw:#3A3A3C" aria-label="Graphite"></button>
+          <button type="button" class="swatch" data-variant="silver" style="--sw:#C7C7CC" aria-label="Silver"></button>
+          <button type="button" class="swatch" data-variant="ember" style="--sw:#D9482B" aria-label="Ember"></button>
+        </div>
+        <button type="button" class="btn btn--ghost add" data-product="plume-one" data-variant="graphite" data-price="6400">Add to cart</button>
+      </div>
+    </article>
+
+    <article class="card reveal" data-card="plume-arc">
+      <img src="assets/img/arc-hero.jpg" alt="PLUME ARC">
+      <div class="card__body">
+        <p class="card__index mono">02</p>
+        <h3 class="card__name">PLUME ARC</h3>
+        <p class="card__tag">Six hundred draws, no buttons.</p>
+        <p class="card__price" data-price="2200">$22</p>
+        <div class="swatches swatches--small" role="group" aria-label="PLUME ARC colourways">
+          <button type="button" class="swatch is-active" data-variant="onyx" style="--sw:#141416" aria-label="Onyx"></button>
+          <button type="button" class="swatch" data-variant="chalk" style="--sw:#EDEDE8" aria-label="Chalk"></button>
+          <button type="button" class="swatch" data-variant="gold" style="--sw:#E8B84B" aria-label="Gold"></button>
+        </div>
+        <button type="button" class="btn btn--ghost add" data-product="plume-arc" data-variant="onyx" data-price="2200">Add to cart</button>
+      </div>
+    </article>
+
+    <article class="card reveal" data-card="plume-reserve">
+      <img src="assets/img/reserve-hero.jpg" alt="PLUME RESERVE">
+      <div class="card__body">
+        <p class="card__index mono">03</p>
+        <h3 class="card__name">PLUME RESERVE</h3>
+        <p class="card__tag">Steeped small. Poured slow.</p>
+        <p class="card__price" data-price="1800">$18</p>
+        <div class="swatches swatches--small" role="group" aria-label="PLUME RESERVE flavours">
+          <button type="button" class="swatch is-active" data-variant="blackcurrant-mint" style="--sw:#6B3FA0" aria-label="Blackcurrant Mint"></button>
+          <button type="button" class="swatch" data-variant="vanilla-bourbon" style="--sw:#B07C3A" aria-label="Vanilla Bourbon"></button>
+          <button type="button" class="swatch" data-variant="citrus-ice" style="--sw:#3FA0A5" aria-label="Citrus Ice"></button>
+        </div>
+        <button type="button" class="btn btn--ghost add" data-product="plume-reserve" data-variant="blackcurrant-mint" data-price="1800">Add to cart</button>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- =================================================== CRAFT ====== -->
+<section id="craft" data-name="CRAFT">
+  <p class="marker mono" data-marker>06 / 07</p>
+
+  <div class="craft__copy">
+    <h2 class="section-title">Machined, not moulded</h2>
+    <p class="craft__body reveal">Two finishes, one tolerance. The body is turned from solid
+      aluminium and brushed along a single axis so the light reads the same way on every
+      unit that leaves the bench.</p>
+    <dl class="specs">
+      <div class="specs__row"><dt class="mono">BODY</dt><dd>6061 aluminium</dd></div>
+      <div class="specs__row"><dt class="mono">FINISH</dt><dd>Directional brush</dd></div>
+      <div class="specs__row"><dt class="mono">TOLERANCE</dt><dd>± 0.05 mm</dd></div>
+      <div class="specs__row"><dt class="mono">SEAMS</dt><dd>None visible</dd></div>
+    </dl>
+  </div>
+
+  <div class="craft__stack">
+    <img class="craft__img craft__img--a" src="assets/img/craft-01.jpg" alt="Radial brushed metal" data-parallax>
+    <img class="craft__img craft__img--b" src="assets/img/craft-02.jpg" alt="Linear brushed metal grain" data-parallax>
+  </div>
+</section>
+
+<!-- =================================================== ORDER ====== -->
+<section id="order" data-name="ORDER">
+  <p class="marker mono" data-marker>07 / 07</p>
+
+  <div class="order__inner">
+    <h2 class="order__title">Take the set.</h2>
+    <p class="order__sub">Add anything to the cart and check out. You will get an order
+      number. Nothing will arrive.</p>
+    <button type="button" class="btn btn--solid" id="openCart">Open cart</button>
+  </div>
+</section>
+
+</main>
+
+<!-- ================================================= FOOTER ======= -->
+<footer id="footer">
+  <div class="footer__nav">
+    <a href="#hero">Intro</a>
+    <a href="#range">The range</a>
+    <a href="#craft">Craft</a>
+    <a href="#order">Order</a>
+  </div>
+  <p class="footer__note mono" id="disclaimer">This is a design demo. No products are sold and no order is placed.</p>
+  <p class="footer__note mono">21+ only. Nicotine is an addictive substance.</p>
+  <p class="footer__note mono">Not affiliated with any real brand.</p>
+  <p class="footer__brand">PLUME</p>
+</footer>
+
+<!-- ================================================ CART DRAWER === -->
+<aside class="drawer" id="cartDrawer" aria-label="Cart" hidden>
+  <header class="drawer__head">
+    <p class="mono">YOUR CART</p>
+    <button type="button" class="drawer__close" id="cartClose" aria-label="Close cart">×</button>
+  </header>
+
+  <div class="drawer__body">
+    <p class="drawer__empty" id="cartEmpty">Your cart is empty.</p>
+    <ul class="drawer__lines" id="cartLines"></ul>
+  </div>
+
+  <footer class="drawer__foot">
+    <div class="drawer__row">
+      <span class="mono">SUBTOTAL</span>
+      <strong id="cartSubtotal">$0</strong>
+    </div>
+    <button type="button" class="btn btn--solid drawer__checkout" id="checkoutBtn">Proceed to checkout</button>
+    <button type="button" class="btn btn--ghost drawer__continue" id="continueShopping">Browse the range</button>
+  </footer>
+</aside>
+
+<!-- ================================================= CHECKOUT ===== -->
+<section class="checkout" id="checkout" aria-label="Checkout" hidden>
+  <div class="checkout__panel">
+    <header class="checkout__head">
+      <p class="mono">CHECKOUT</p>
+      <button type="button" class="drawer__close" id="checkoutClose" aria-label="Close checkout">×</button>
+    </header>
+
+    <div class="checkout__grid" id="checkoutForm">
+      <form class="checkout__fields" id="orderForm" novalidate>
+        <label class="field">Name<input type="text" name="name" autocomplete="name"></label>
+        <label class="field">Email<input type="email" name="email" autocomplete="email"></label>
+        <label class="field field--wide">Address<input type="text" name="address" autocomplete="street-address"></label>
+        <label class="field">City<input type="text" name="city" autocomplete="address-level2"></label>
+        <label class="field">Postcode<input type="text" name="postcode" autocomplete="postal-code"></label>
+        <label class="field field--wide">Delivery note<textarea name="note" rows="2"></textarea></label>
+        <p class="field__error" id="formError" role="alert" hidden></p>
+        <p class="checkout__demo mono">Demo only — no payment is taken and no order is sent.</p>
+        <button type="submit" class="btn btn--solid" id="placeOrder">Place order</button>
+      </form>
+
+      <aside class="checkout__summary">
+        <p class="mono">ORDER SUMMARY</p>
+        <ul class="checkout__lines" id="summaryLines"></ul>
+        <div class="drawer__row">
+          <span class="mono">TOTAL</span>
+          <strong id="summaryTotal">$0</strong>
+        </div>
+      </aside>
+    </div>
+
+    <div class="checkout__confirm" id="confirmPanel" hidden>
+      <p class="mono">ORDER CONFIRMED</p>
+      <p class="checkout__number" id="orderNumber">PLM-0000-2026</p>
+      <p class="checkout__eta">Estimated delivery: 3–5 business days</p>
+      <p class="checkout__demo mono">This is a design demo. No order was placed and nothing will arrive.</p>
+      <button type="button" class="btn btn--ghost" id="continueAfter">Continue</button>
+    </div>
+  </div>
+</section>
 
 <script src="assets/vendor/gsap.min.js"></script>
 <script src="assets/vendor/ScrollTrigger.min.js"></script>
